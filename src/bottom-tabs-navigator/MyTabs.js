@@ -8,6 +8,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContextProvider';
 import Logout from '../screens/Logout';
 import { StyleSheet, View } from 'react-native';
+import LocalTimes from '../screens/LocalTimes';
 
 const Tab = createBottomTabNavigator();
 
@@ -47,6 +48,8 @@ function MyTabs() {
                                 iconName = 'create';
                             } else if (route.name === 'Logout') {
                                 iconName = 'log-out';
+                            } else if (route.name === 'Local') {
+                                iconName = 'map';
                             }
 
                             // You can return any component that you like here!
@@ -63,6 +66,8 @@ function MyTabs() {
                         &&
                         <Tab.Screen name='Edit Times' component={EditTimes} />
                     }
+                    <Tab.Screen name='Local' component={LocalTimes} />
+
                     {user ?
                         <Tab.Screen name='Logout' component={Logout} />
                         :

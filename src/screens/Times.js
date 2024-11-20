@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
-import { formatTime } from '../utils/functions'
+import { formatTime, isNearTime } from '../utils/functions'
 import { TimesContext } from '../context/TimesContextProvider'
 
 const Times = () => {
@@ -8,42 +8,6 @@ const Times = () => {
 
     const [date, setDate] = useState(new Date())
     const currentTime = formatTime(date)
-
-    // Function to convert prayer time to a Date object
-    const convertToDate = (time) => {
-        let convertedHours = parseInt(time.hours);
-
-        // Convert to 24-hour format based on the period
-        if (time.period == "pm" && convertedHours < 12) {
-            convertedHours += 12; // Add 12 to convert PM to 24-hour format
-        } else if (time.period == "am" && convertedHours == 12) {
-            convertedHours = 0; // Convert 12 AM to 0 hours (midnight)
-        }
-
-        // Create a new Date object using today's date and the converted time
-        const now = new Date();
-        now.setHours(convertedHours)
-        now.setMinutes(time.minutes)
-        return now
-    }
-
-    // Function to check if time is within 30 minutes
-    const isNearTime = (time) => {
-        const prayerTime = convertToDate(time.time)
-        const difference = Math.abs((date - prayerTime) / 1000 / 60) // Difference in minutes
-        // check if the day is friday then highlight al-juma otherwise al-zuhur
-        if (time.id == 6) {
-            return date.getDay() == 5 && difference >= 0 && difference <= 31 // If the juma prayer time is within the next 30 minutes and its friday
-        } else if (time.id == 2) {
-            return date.getDay() != 5 && difference >= 0 && difference <= 31 // If the alzuhur prayer time is within the next 30 minutes and its not friday
-        } else {
-            return date.getDay() != 5 && difference >= 0 && difference <= 31 // If the prayer time is within the next 30 minutes
-
-        }
-
-
-
-    }
 
     useEffect(() => {
         const interval = setInterval(() => {
