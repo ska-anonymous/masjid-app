@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, ImageBackground } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { formatTime, isNearTime } from '../utils/functions'
 import { TimesContext } from '../context/TimesContextProvider'
 
 const Times = () => {
-    const { times, fetchingTimes } = useContext(TimesContext)
+    const { times, lastSaved } = useContext(TimesContext)
 
     const [date, setDate] = useState(new Date())
     const currentTime = formatTime(date)
@@ -27,9 +27,12 @@ const Times = () => {
                     <View style={styles.currentTimeBox}>
                         <Text style={styles.currentTimeText}>{currentTime}</Text>
                     </View>
-                    {fetchingTimes &&
-                        <ActivityIndicator size={50} color={'cyan'} />
+
+                    {
+                        lastSaved &&
+                        <Text>last updated {lastSaved.toLocaleString('en-GB', { hour12: true })}</Text>
                     }
+
                     <View style={styles.timesContainer}>
                         {times.map((time) => {
                             const near = isNearTime(time)

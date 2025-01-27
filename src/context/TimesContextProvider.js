@@ -2,10 +2,12 @@ import React, { createContext, useEffect, useState } from 'react'
 import { getDatabase } from '@react-native-firebase/database';
 import { timesData } from '../constants/timesData';
 import { convertToDate } from '../utils/functions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export const TimesContext = createContext();
 
 const TimesContextProvider = ({ children }) => {
     const [times, setTimes] = useState([]);
+    const [lastSaved, setLastSaved] = useState(null);
     const [fetchingTimes, setFetchingTimes] = useState(false);
     const [timesUpdating, setTimesUpdating] = useState(false);
 
@@ -53,6 +55,10 @@ const TimesContextProvider = ({ children }) => {
             })
 
             setTimes(updatedTimes)
+
+            // also save the fetched times to local storage
+            handleSaveTimes(updatedTimes)
+
             setFetchingTimes(false)
         })
 
@@ -73,8 +79,42 @@ const TimesContextProvider = ({ children }) => {
         return success;
     }
 
+    const handleGetStorageTimes = async () => {
+        try {
+            let storageData = await AsyncStorage.getItem('times')
+            if (!storageData)
+                return
+            storageData = JSON.parse(storageData)
+
+            setLastSaved(new Date(storageData.lastSaved))
+            setTimes(storageData.times)
+        } catch (error) {
+            console.log('Error getting times from async storage', error)
+        }
+    }
+
+
+    const handleSaveTimes = async (timesData) => {
+        const date = new Date()
+        setLastSaved(date)
+
+        const dataToSave = {
+            lastSaved: date,
+            times: timesData
+        }
+
+        // now save data to async storage
+        try {
+            await AsyncStorage.setItem('times', JSON.stringify(dataToSave))
+            console.log('Times Saved to async storage')
+        } catch (error) {
+            console.log('Error while saving time data to asyn storage', error)
+        }
+    }
+
     useEffect(() => {
         handleFetchTimes()
+        handleGetStorageTimes()
     }, [])
     return (
         <TimesContext.Provider
@@ -84,7 +124,10 @@ const TimesContextProvider = ({ children }) => {
                 timesUpdating,
                 handleUpdateTimes,
                 fetchingTimes,
-                handleFetchTimes
+                handleFetchTimes,
+                handleSaveTimes,
+                lastSaved,
+                setLastSaved
             }}
         >
             {children}
